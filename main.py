@@ -5,6 +5,7 @@ from telebot import types
 
 bot = telebot.TeleBot("5995826586:AAHtcGH6qoToJDN29SnMjwBYgpLjoiviON0")
 API = "e18fd8f4421d1c1a6638179d7b897f81"
+A_picture = "https://api.waifu.pics/sfw/waifu"
 
 
 @bot.message_handler(commands=["start"])
@@ -46,6 +47,14 @@ def choose_city(message):
     elif message.text == "Погода":
         bot.reply_to(message, "Ну типа отправяется погода твоего города")
         #картиночки
+    elif message.text == "Тест":
+        res = requests.get(A_picture)
+        link_image = json.loads(res.text)
+        image = link_image["url"]
+
+        bot.send_photo(message.chat.id,image)
+
+        bot.reply_to(message, "Ура аниме пикча")
 
     else:
         user_t(message)
@@ -63,6 +72,8 @@ def user_t(message):
 @bot.message_handler(content_types=["sticker"])
 def reaction_on_sticker(message):
     bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAALdKWTqlud3Py_lddg1SSEVPf0_Z-3OAAJWDQACZbCZSlC-DztRCvnTMAQ')
+
+
 
 
 
