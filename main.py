@@ -3,7 +3,7 @@ import requests
 import json
 from telebot import types
 
-bot = telebot.TeleBot("5995826586:AAHtcGH6qoToJDN29SnMjwBYgpLjoiviON0")
+bot = telebot.TeleBot("")
 API = ""
 A_picture = "https://api.waifu.pics/sfw/waifu"
 
