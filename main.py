@@ -2,10 +2,23 @@ import telebot
 import requests
 import json
 from telebot import types
+import random
 
 bot = telebot.TeleBot("")
 API = ""
 A_picture = "https://api.waifu.pics/sfw/waifu"
+
+sticker_ids = ["CAACAgIAAxkBAALdKWTqlud3Py_lddg1SSEVPf0_Z-3OAAJWDQACZbCZSlC-DztRCvnTMAQ",
+               "CAACAgIAAxkBAAEBFONlBZkyVNhVLIluElrFHFXcEQw2zwACCBQAAoUTAUviN_lSxPexIjAE",
+               "CAACAgIAAxkBAAEBFOVlBZk2_J4I6-ARqhsBE_tb_CNO6wACBhUAAqMfAAFL-hxiQICXrqQwBA",
+               "CAACAgIAAxkBAAEBFOdlBZk9EMB61fOUXPBLw74EXXfUDgACDx8AAjEweUvqf9cIWm40rzAE",
+               "CAACAgIAAxkBAAEBFOxlBZoYrlYuiFIaVuvjBVUPz5HeqgACwhcAAn35CEpLOXYqcHQJBTAE",
+               "CAACAgIAAxkBAAEBFPFlBZqEPyOiahPUPp0TDKEQkcVfxAACZB0AAk6DMUuCuSVVotHEiDAE",
+               "CAACAgIAAxkBAAEBFPNlBZqQRB5_URzdendPpsY1F75eLwACKAsAAmabiEupRrF6X15LxjAE",
+               "CAACAgIAAxkBAAEBFPVlBZqbgBOY2RT6GqLLtR-BXkdFmAACwg8AAg7WWUqbH6WpjCEvIzAE",
+               "CAACAgIAAxkBAAEBFPdlBZqdJeRcB3Gc0cZbUVAhdt9R2AACZwsAAhOBYUpl8WbUGoiU8zAE",
+               "CAACAgIAAxkBAAEBFPllBZql2-Sx3qaYGkyXrfxIbO52EwACYgwAAnm2qEo888p9JLFmpjAE",
+               "CAACAgIAAxkBAAEBFP1lBZu1HCSgLIiyurtSDW9TpLnt2wAC0BcAAvBJ8EpoI6YLGmfpFTAE"]
 
 
 @bot.message_handler(commands=["start"])
@@ -46,6 +59,11 @@ def choose_city(message):
         bot.reply_to(message, "Город выбран")
     elif message.text == "Погода":
         bot.reply_to(message, "Ну типа отправяется погода твоего города")
+        res = requests.get(A_picture)
+        link_image = json.loads(res.text)
+        image = link_image["url"]
+
+        bot.send_photo(message.chat.id, image)
         #картиночки
     elif message.text == "Тест":
         res = requests.get(A_picture)
@@ -71,7 +89,7 @@ def user_t(message):
 
 @bot.message_handler(content_types=["sticker"])
 def reaction_on_sticker(message):
-    bot.send_sticker(message.chat.id, 'CAACAgIAAxkBAALdKWTqlud3Py_lddg1SSEVPf0_Z-3OAAJWDQACZbCZSlC-DztRCvnTMAQ')
+    bot.send_sticker(message.chat.id, random.choice(sticker_ids))
 
 
 
