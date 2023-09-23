@@ -4,7 +4,7 @@ import json
 from telebot import types
 
 bot = telebot.TeleBot("5995826586:AAHtcGH6qoToJDN29SnMjwBYgpLjoiviON0")
-API = "e18fd8f4421d1c1a6638179d7b897f81"
+API = ""
 A_picture = "https://api.waifu.pics/sfw/waifu"
 
 
