@@ -6,11 +6,8 @@ import random
 import sqlite3
 
 bot = telebot.TeleBot("5995826586:AAHtcGH6qoToJDN29SnMjwBYgpLjoiviON0")
-
 API = "e18fd8f4421d1c1a6638179d7b897f81"
-
 A_picture = "https://api.waifu.pics/sfw/waifu"
-
 sticker_ids = ["CAACAgIAAxkBAALdKWTqlud3Py_lddg1SSEVPf0_Z-3OAAJWDQACZbCZSlC-DztRCvnTMAQ",
                "CAACAgIAAxkBAAEBFONlBZkyVNhVLIluElrFHFXcEQw2zwACCBQAAoUTAUviN_lSxPexIjAE",
                "CAACAgIAAxkBAAEBFOVlBZk2_J4I6-ARqhsBE_tb_CNO6wACBhUAAqMfAAFL-hxiQICXrqQwBA",
@@ -63,7 +60,7 @@ def getting_data_from_db():
 
 getting_data_from_db()
 
-print("Проверка на спид ", user_city)
+print("Наличие в переменной данных", user_city)
 
 @bot.message_handler(commands=["start"])
 def start(message):
@@ -82,10 +79,9 @@ def define_city(message):
             markup.add(btn1)
             markup.add(btn2)
 
-            #sending_weather(message) хуй знает там баг получается что первое сообщение с норм названием города вообще другую хуйню вызывает
             data = json.loads(res.text)
             temp = data['main']['temp']
-            bot.send_message(message.chat.id, f"Город выбран, температура в нём: {temp}", reply_markup=markup)
+            bot.send_message(message.chat.id, f"Город выбран, температура в нём: {temp}°C", reply_markup=markup)
             res = requests.get(A_picture)
             link_image = json.loads(res.text)
             image = link_image["url"]
@@ -106,18 +102,15 @@ def define_city(message):
 
 @bot.message_handler(content_types=["text"])
 def receiving_text_user(message):
-    if message.text == "Погода":
+    if message.text == "Погода" or message.text == "погода":
         sending_weather(message)
 
-    elif message.text == "Изменить город":
-        bot.reply_to(message, "изменение в словарь по id")
-
-    elif message.text == "погода":
-        sending_weather(message)
+    elif message.text == "Изменить город" or message.text == "изменить город":
+        bot.send_message(message.chat.id, "Напиши новое название города")
+        bot.register_next_step_handler(message, change_user_city)
 
     else:
         user_temp(message)
-
 
 
 def sending_weather(message):
@@ -137,15 +130,45 @@ def sending_weather(message):
         bot.send_message(message.chat.id, "Город не выбран, напиши от куда ты хочешь получать погоду")
         bot.register_next_step_handler(message, define_city)
 
+def change_user_city(message):
+    try:
+        city = message.text.strip().lower()
+        res = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API}&units=metric")
+        if res.status_code == 200:
+            id = str(message.from_user.id)
+
+            db = sqlite3.connect("DataUser.db")
+            sql = db.cursor()
+            sql.execute('UPDATE user SET city_user = ? WHERE id_user = ? ', (city,id))
+            db.commit()
+
+
+            user_city[id] = city
+            print(f"данные чела {id} изменены", user_city)
+            bot.send_message(message.chat.id, f"Новый город: {city} выбран")
+            user_temp(message)
+        else:
+            bot.send_message(message.chat.id, "Произошла хуйня, повтори")
+            bot.register_next_step_handler(message, change_user_city)
+    except AttributeError:
+        bot.reply_to(message, "Сука делать совсем нехуй? отправь название блять")
+        bot.register_next_step_handler(message, define_city)
+
+
+
 
 def user_temp(message):
     city = message.text.strip().lower()
     res = requests.get(f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API}&units=metric")
     if res.status_code == 200:
-        # data = json.loads(res.text)
-        # temp = data['main']['temp']
-        # bot.send_message(message.chat.id, f"Температура: {temp}")
-        sending_weather(message)
+        data = json.loads(res.text)
+        temp = data['main']['temp']
+        bot.send_message(message.chat.id, f"{city} {temp}°C")
+
+        res = requests.get(A_picture)
+        link_image = json.loads(res.text)
+        image = link_image["url"]
+        bot.send_photo(message.chat.id, image)
     else:
         bot.send_message(message.chat.id, "Не понял")
 
@@ -158,10 +181,16 @@ def save_on_db_user_city(message, city):
 
     db.commit()
 
+# def add_new_data_in_db():
+#     db = sqlite3.connect("DataUser.db")
+#     sql = db.cursor()
+#     sql.execute(f"INSERT INTO user VALUES (?,?)",("АЙДИШНИК","ГОРОД"))
+#     db.commit()
+# add_new_data_in_db()
+
 @bot.message_handler(content_types=["sticker"])
 def reaction_on_sticker(message):
     bot.send_sticker(message.chat.id, random.choice(sticker_ids))
 
 
-# bot.infinity_polling()
 bot.polling(none_stop=True)
